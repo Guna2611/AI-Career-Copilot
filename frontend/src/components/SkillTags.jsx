@@ -1,14 +1,14 @@
 function Tag({ children, tone = "neutral" }) {
   const toneClasses = {
     success:
-      "border-emerald-200 bg-emerald-50 text-emerald-700 shadow-emerald-100/60",
-    danger: "border-rose-200 bg-rose-50 text-rose-700 shadow-rose-100/60",
-    neutral: "border-slate-200 bg-slate-50 text-slate-700 shadow-slate-100/60",
+      "border-emerald-200 bg-emerald-50 text-emerald-700",
+    danger: "border-rose-200 bg-rose-50 text-rose-700",
+    neutral: "border-slate-200 bg-slate-50 text-slate-700",
   };
 
   return (
     <span
-      className={`inline-flex rounded-full border px-3 py-1 text-sm font-medium shadow-sm ${toneClasses[tone]}`}
+      className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-medium ${toneClasses[tone]}`}
     >
       {children}
     </span>
@@ -17,11 +17,11 @@ function Tag({ children, tone = "neutral" }) {
 
 function SkillGroup({ title, description, skills, tone, emptyState }) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_16px_50px_-35px_rgba(15,23,42,0.35)]">
-      <h3 className="text-lg font-semibold text-slate-900">{title}</h3>
-      <p className="mt-1 text-sm text-slate-600">{description}</p>
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h3 className="text-base font-bold text-slate-900">{title}</h3>
+      <p className="mt-1 text-sm text-slate-500">{description}</p>
 
-      <div className="mt-5 flex flex-wrap gap-3">
+      <div className="mt-5 flex flex-wrap gap-2">
         {skills.length > 0 ? (
           skills.map((skill) => (
             <Tag key={skill} tone={tone}>
@@ -29,7 +29,7 @@ function SkillGroup({ title, description, skills, tone, emptyState }) {
             </Tag>
           ))
         ) : (
-          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+          <div className="w-full rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500 text-center">
             {emptyState}
           </div>
         )}
