@@ -96,7 +96,14 @@ async def process_resume_submission(
     semantic_score = calculate_semantic_score(
         processed_resume_text, processed_job_description
     )
-    score = round((skill_score * 0.7) + (semantic_score * 0.3), 2)
+    
+    if semantic_score < 0:
+        # Embeddings are disabled for memory limits (e.g. Render Free Tier)
+        # Fallback entirely to explicit skill extraction scoring
+        score = skill_score
+        semantic_score = skill_score # Mirror for frontend display consistency
+    else:
+        score = round((skill_score * 0.7) + (semantic_score * 0.3), 2)
     improvement_suggestions, suggestion_source = (
         await generate_improvement_suggestions(
             processed_resume_text,

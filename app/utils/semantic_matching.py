@@ -1,19 +1,25 @@
-from sentence_transformers import SentenceTransformer, util
-
+from typing import Any
+from app.utils.config import settings
 _model: SentenceTransformer | None = None
 
 
-def _get_model() -> SentenceTransformer:
+def _get_model() -> Any:
     global _model
     if _model is None:
+        from sentence_transformers import SentenceTransformer
         _model = SentenceTransformer("all-MiniLM-L6-v2")
     return _model
 
 
 def calculate_semantic_score(resume_text: str, job_description_text: str) -> float:
+    if settings.DISABLE_EMBEDDINGS:
+        return -1.0
+        
     if not resume_text.strip() or not job_description_text.strip():
         return 0.0
 
+    from sentence_transformers import util
+    
     model = _get_model()
     embeddings = model.encode(
         [resume_text, job_description_text],

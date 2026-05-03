@@ -13,6 +13,7 @@ class Settings:
     ALLOWED_ORIGINS: list[str] = field(default_factory=lambda: ["*"])
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    DISABLE_EMBEDDINGS: bool = os.getenv("DISABLE_EMBEDDINGS", "false").lower() == "true"
 
 
 settings = Settings()
