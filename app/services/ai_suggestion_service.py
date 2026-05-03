@@ -27,16 +27,29 @@ def _build_fallback_suggestions(missing_skills: list[str]) -> list[str]:
 
 
 def _parse_suggestions(raw_content: str) -> list[str]:
+    cleaned = raw_content.strip()
+    if cleaned.startswith("```json"):
+        cleaned = cleaned[7:]
+    elif cleaned.startswith("```"):
+        cleaned = cleaned[3:]
+    if cleaned.endswith("```"):
+        cleaned = cleaned[:-3]
+    cleaned = cleaned.strip()
+
     try:
-        parsed: Any = json.loads(raw_content)
+        parsed: Any = json.loads(cleaned)
         if isinstance(parsed, list):
             return [str(item).strip() for item in parsed if str(item).strip()]
-    except json.JSONDecodeError:
-        pass
+    except json.JSONDecodeError as exc:
+        logger.debug("JSON decode error: %s", exc)
 
-    lines = [line.strip("-* \t") for line in raw_content.splitlines()]
-    suggestions = [line for line in lines if line]
-    return suggestions[:6]
+    lines = []
+    for line in cleaned.splitlines():
+        line = line.strip("-* \t\",[]{}")
+        if line and len(line) > 3:
+            lines.append(line)
+            
+    return lines[:6]
 
 
 def _build_fallback_questions(missing_skills: list[str]) -> list[str]:
