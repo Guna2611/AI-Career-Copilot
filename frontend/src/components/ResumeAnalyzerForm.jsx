@@ -248,7 +248,7 @@ function ResumeAnalyzerForm() {
                 missingSkills={analysisResult.missingSkills}
               />
             </div>
-            <div className="mt-6 grid gap-6 xl:grid-cols-2">
+            <div className="mt-6 grid gap-6 xl:grid-cols-2 items-start">
               <SuggestionList
                 suggestions={analysisResult.improvementSuggestions}
                 source={analysisResult.suggestionSource}
