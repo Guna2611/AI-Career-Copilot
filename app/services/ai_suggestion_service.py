@@ -39,7 +39,8 @@ def _parse_suggestions(raw_content: str) -> list[str]:
     try:
         parsed: Any = json.loads(cleaned)
         if isinstance(parsed, list):
-            return [str(item).strip() for item in parsed if str(item).strip()]
+            items = [str(item).strip() for item in parsed if str(item).strip()]
+            return list(dict.fromkeys(items)) # Remove exact duplicates
     except json.JSONDecodeError as exc:
         logger.debug("JSON decode error: %s", exc)
 
@@ -49,7 +50,12 @@ def _parse_suggestions(raw_content: str) -> list[str]:
         if line and len(line) > 3:
             lines.append(line)
             
-    return lines[:6]
+    # Deduplicate items to prevent AI repetition
+    unique_lines = list(dict.fromkeys(lines))
+            
+    # Backend intentionally returns a large payload (up to 15 items)
+    # The frontend is responsible for truncating to 5 and showing a "View More" button.
+    return unique_lines[:15]
 
 
 def _build_fallback_questions(missing_skills: list[str]) -> list[str]:
@@ -71,7 +77,9 @@ def _parse_questions(raw_content: str) -> list[str]:
     parsed = _parse_suggestions(raw_content)
     if not parsed:
         return []
-    return parsed[:10]
+    # Backend intentionally returns a large payload (up to 15 items)
+    # The frontend is responsible for truncating and showing a "View More" button.
+    return parsed[:15]
 
 
 def _get_gemini_model() -> genai.GenerativeModel | None:
@@ -93,8 +101,12 @@ async def generate_improvement_suggestions(
         return _build_fallback_suggestions(missing_skills), "fallback"
 
     prompt = (
-        "You are a resume coach. Analyze the resume, the job description, and the missing skills. "
-        "Return only a valid JSON array of 4-8 concise, practical resume improvement suggestions.\n\n"
+        "You are an expert technical resume coach. Analyze the resume, the job description, and the missing skills.\n"
+        "Return ONLY a valid JSON array of 10-15 concise, highly actionable resume improvement suggestions.\n\n"
+        "STRICT QUALITY RULES:\n"
+        "1. Prioritize Quality & Impact: Order the suggestions from most critical (highest impact) to least critical.\n"
+        "2. No Repetition: Every single suggestion must address a unique concept. Do not rephrase the same advice.\n"
+        "3. JD Specificity: Explicitly tie your advice to the provided job description requirements.\n\n"
         f"Missing skills: {', '.join(missing_skills) if missing_skills else 'None'}\n\n"
         f"Job description:\n{job_description[:3000]}\n\n"
         f"Resume text:\n{resume_text[:3000]}"
@@ -132,8 +144,12 @@ async def generate_interview_questions(
         return {"questions": _build_fallback_questions(missing_skills)}, "fallback"
 
     prompt = (
-        "Generate 5 to 8 practical, role-relevant technical interview questions "
-        "based on these missing skills. Return only a valid JSON array.\n\n"
+        "You are an expert technical interviewer. Generate 10 to 15 practical, role-relevant interview questions "
+        "based on these missing skills. Return ONLY a valid JSON array of strings.\n\n"
+        "STRICT QUALITY RULES:\n"
+        "1. Prioritize Relevance: Order the questions from most likely to be asked to least likely.\n"
+        "2. No Repetition: Ensure every question tests a distinct technical concept or scenario.\n"
+        "3. High Quality: Avoid generic behavioral questions unless they specifically target the missing skill context.\n\n"
         f"Missing skills: {', '.join(missing_skills) if missing_skills else 'None'}"
     )
 
@@ -150,12 +166,12 @@ async def generate_interview_questions(
         )
         raw_content = response.text or "[]"
         questions = _parse_questions(raw_content)
-        if 5 <= len(questions) <= 8:
+        if 5 <= len(questions) <= 15:
             return {"questions": questions}, "gemini"
         if questions:
             padded = questions + _build_fallback_questions(missing_skills)
             unique_questions = list(dict.fromkeys(padded))
-            return {"questions": unique_questions[:8]}, "gemini"
+            return {"questions": unique_questions[:15]}, "gemini"
     except Exception as exc:
         logger.warning(
             "Gemini interview question generation failed for model %s: %s",
