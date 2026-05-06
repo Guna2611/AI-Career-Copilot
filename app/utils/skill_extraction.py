@@ -159,6 +159,14 @@ ALIAS_TO_CANONICAL: dict[str, str] = {
 }
 
 
+def normalize_dynamic_skill(skill: str) -> str:
+    """
+    Lowercase, strip, and map to a predefined canonical if an alias matches.
+    """
+    skill = skill.lower().strip()
+    return ALIAS_TO_CANONICAL.get(skill, skill)
+
+
 SHORT_ALIAS_LENGTH_MAX = 4
 
 
@@ -179,6 +187,12 @@ def _compile_alias_patterns(
         for alias, canonical in ALIAS_TO_CANONICAL.items()
         if canonical in canonicals_set
     ]
+
+    # Support dynamic/AI skills that don't exist in ALIAS_TO_CANONICAL
+    mapped_canonicals = {canonical for _, canonical in relevant_aliases}
+    for canonical in canonicals_set:
+        if canonical not in mapped_canonicals:
+            relevant_aliases.append((canonical, canonical))
 
     # Prefer longest phrase matching first.
     # Using length in characters + whitespace count as a cheap proxy.
@@ -318,6 +332,35 @@ def calculate_skill_match(
         matched_skills,
         missing_skills,
     )
+
+
+def calculate_hybrid_skill_match(
+    resume_text: str,
+    job_description_text: str,
+    ai_jd_skills: list[str],
+) -> tuple[list[str], list[str], list[str], list[str]]:
+    """
+    Hybrid match combining dictionary extraction and dynamic AI extraction.
+    Returns: resume_skills, job_description_skills, matched_skills, missing_skills
+    """
+    # 1. Predefined dictionary extraction
+    predefined_jd_skills = extract_skills_from_text(job_description_text, PREDEFINED_SKILLS)
+    predefined_resume_skills = extract_skills_from_text(resume_text, PREDEFINED_SKILLS)
+
+    # 2. Normalize AI skills
+    normalized_ai_skills = set(normalize_dynamic_skill(s) for s in ai_jd_skills)
+
+    # 3. Combine JD skills
+    job_description_skills = sorted(set(predefined_jd_skills).union(normalized_ai_skills))
+
+    # 4. Search for AI skills in the resume text
+    ai_skills_in_resume = extract_skills_from_text(resume_text, list(normalized_ai_skills))
+
+    resume_skills = sorted(set(predefined_resume_skills).union(ai_skills_in_resume))
+    matched_skills = sorted(set(resume_skills).intersection(job_description_skills))
+    missing_skills = sorted(set(job_description_skills).difference(resume_skills))
+
+    return resume_skills, job_description_skills, matched_skills, missing_skills
 
 
 def calculate_match_score(matched_skills: list[str], job_skills: list[str]) -> float:

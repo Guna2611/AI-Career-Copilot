@@ -181,3 +181,43 @@ async def generate_interview_questions(
 
     logger.info("Using fallback interview questions")
     return {"questions": _build_fallback_questions(missing_skills)}, "fallback"
+
+
+async def extract_job_skills(job_description: str) -> tuple[list[str], str]:
+    model = _get_gemini_model()
+    if model is None:
+        logger.info("Using fallback for skill extraction")
+        return [], "fallback"
+
+    prompt = (
+        "You are an expert technical recruiter. Read the following job description and extract a comprehensive list of:\n"
+        "- Required skills\n"
+        "- Tools and technologies\n"
+        "- Domain-specific keywords\n"
+        "- Key responsibilities that represent capabilities\n\n"
+        "Return ONLY a valid JSON array of strings.\n"
+        "Keep the skills concise (e.g., 'React', 'Data Analysis', 'Adobe Photoshop', 'Candidate Sourcing').\n\n"
+        f"Job description:\n{job_description[:3000]}"
+    )
+
+    try:
+        logger.info("Using Gemini skill extraction with model: %s", settings.GEMINI_MODEL)
+        response = model.generate_content(
+            [
+                "Return only a valid JSON array of skill strings.",
+                prompt,
+            ]
+        )
+        raw_content = response.text or "[]"
+        skills = _parse_suggestions(raw_content)
+        if skills:
+            return skills, "gemini"
+    except Exception as exc:
+        logger.warning(
+            "Gemini skill extraction failed for model %s: %s",
+            settings.GEMINI_MODEL,
+            exc,
+        )
+
+    logger.info("Using fallback skill extraction")
+    return [], "fallback"

@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jobfit_backend
+    ports:
+      - "8000:8000"
+    # Automatically pulls environment variables from your local .env file
+    env_file:
+      - .env
+    # For local dev, we ensure embeddings are enabled (since the default is false if missing)
+    environment:
+      - DISABLE_EMBEDDINGS=false
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      # Vite requires environment variables at BUILD time, not runtime.
+      # We inject the internal Docker network URL here so the frontend can talk to the backend container.
+      args:
+        - VITE_API_BASE_URL=http://localhost:8000
+    container_name: jobfit_frontend
+    ports:
+      # Map your host machine's port 5173 (standard Vite port) to the container's Nginx port 80
+      - "5173:80"
+    depends_on:
+      - backend

@@ -38,7 +38,17 @@ function SkillGroup({ title, description, skills, tone, emptyState }) {
   );
 }
 
-function SkillTags({ matchedSkills, missingSkills }) {
+function SkillTags({ matchedSkills, missingSkills, score, jdSkillsCount }) {
+  let missingEmptyState = "Great! No missing skills detected.";
+  
+  if (jdSkillsCount === 0) {
+    missingEmptyState = "Missing skills could not be extracted clearly from this job description.";
+  } else if (missingSkills.length === 0 && score <= 70) {
+    missingEmptyState = "No specific missing skills detected, but overall match is low.";
+  } else if (missingSkills.length === 0 && score > 70) {
+    missingEmptyState = "Great! No missing skills detected.";
+  }
+
   return (
     <section className="grid gap-5 lg:grid-cols-2">
       <SkillGroup
@@ -53,7 +63,7 @@ function SkillTags({ matchedSkills, missingSkills }) {
         description="Keywords and capabilities to strengthen before applying."
         skills={missingSkills}
         tone="danger"
-        emptyState="Great! No missing skills detected."
+        emptyState={missingEmptyState}
       />
     </section>
   );

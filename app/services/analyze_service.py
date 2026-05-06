@@ -6,6 +6,7 @@ from typing import Any
 from fastapi import HTTPException, UploadFile
 
 from app.services.ai_suggestion_service import (
+    extract_job_skills,
     generate_improvement_suggestions,
     generate_interview_questions,
 )
@@ -15,8 +16,8 @@ from app.utils.pdf_extractor import (
 )
 from app.utils.semantic_matching import calculate_semantic_score
 from app.utils.skill_extraction import (
+    calculate_hybrid_skill_match,
     calculate_match_score,
-    calculate_skill_match,
     extract_skill_debug,
 )
 from app.utils.text_preprocessing import preprocess_text
@@ -82,8 +83,12 @@ async def process_resume_submission(
     )
     raw_jd_skills, normalized_jd_skills = extract_skill_debug(processed_job_description)
 
-    _, job_description_skills, matched_skills, missing_skills = calculate_skill_match(
-        processed_resume_text, processed_job_description
+    # AI Skill Extraction
+    ai_jd_skills_raw, extraction_source = await extract_job_skills(processed_job_description)
+
+    # Hybrid Skill Matching
+    resume_skills, job_description_skills, matched_skills, missing_skills = calculate_hybrid_skill_match(
+        processed_resume_text, processed_job_description, ai_jd_skills_raw
     )
 
     logger.info("extracted_raw_resume_skills=%s", raw_resume_skills)
@@ -94,16 +99,9 @@ async def process_resume_submission(
     logger.info("missing_normalized_skills=%s", missing_skills)
     skill_score = calculate_match_score(matched_skills, job_description_skills)
     semantic_score = calculate_semantic_score(
-        processed_resume_text, processed_job_description
+        processed_resume_text, processed_job_description, fallback_score=skill_score
     )
-    
-    if semantic_score < 0:
-        # Embeddings are disabled for memory limits (e.g. Render Free Tier)
-        # Fallback entirely to explicit skill extraction scoring
-        score = skill_score
-        semantic_score = skill_score # Mirror for frontend display consistency
-    else:
-        score = round((skill_score * 0.7) + (semantic_score * 0.3), 2)
+    score = round((skill_score * 0.7) + (semantic_score * 0.3), 2)
     improvement_suggestions, suggestion_source = (
         await generate_improvement_suggestions(
             processed_resume_text,
@@ -142,8 +140,11 @@ async def process_resume_submission(
         "semantic_score": semantic_score,
         "matched_skills": matched_skills,
         "missing_skills": missing_skills,
+        "jd_skills": job_description_skills,
+        "resume_skills": resume_skills,
         "improvement_suggestions": improvement_suggestions,
         "interview_questions": interview_questions,
         "question_source": question_source,
         "suggestion_source": suggestion_source,
+        "extraction_source": extraction_source,
     }

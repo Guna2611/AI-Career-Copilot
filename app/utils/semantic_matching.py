@@ -1,6 +1,6 @@
 from typing import Any
 from app.utils.config import settings
-_model: SentenceTransformer | None = None
+_model: Any | None = None
 
 
 def _get_model() -> Any:
@@ -11,9 +11,11 @@ def _get_model() -> Any:
     return _model
 
 
-def calculate_semantic_score(resume_text: str, job_description_text: str) -> float:
+def calculate_semantic_score(
+    resume_text: str, job_description_text: str, fallback_score: float = 0.0
+) -> float:
     if settings.DISABLE_EMBEDDINGS:
-        return -1.0
+        return fallback_score
         
     if not resume_text.strip() or not job_description_text.strip():
         return 0.0

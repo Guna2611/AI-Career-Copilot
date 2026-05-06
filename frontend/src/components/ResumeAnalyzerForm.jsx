@@ -111,6 +111,7 @@ function ResumeAnalyzerForm() {
         semanticScore: payload.semantic_score ?? 0,
         matchedSkills: payload.matched_skills ?? [],
         missingSkills: payload.missing_skills ?? [],
+        jdSkills: payload.jd_skills ?? [],
         improvementSuggestions: payload.improvement_suggestions ?? [],
         interviewQuestions:
           payload.interview_questions?.questions ?? [],
@@ -246,6 +247,8 @@ function ResumeAnalyzerForm() {
               <SkillTags
                 matchedSkills={analysisResult.matchedSkills}
                 missingSkills={analysisResult.missingSkills}
+                score={analysisResult.score}
+                jdSkillsCount={analysisResult.jdSkills?.length || 0}
               />
             </div>
             <div className="mt-6 grid gap-6 xl:grid-cols-2 items-start">
