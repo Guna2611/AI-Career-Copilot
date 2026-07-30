@@ -1,52 +1,122 @@
-# JobFit AI 🚀
+# 🚀 JobFit AI – AI-Powered Career Assistant
 
-JobFit AI is an AI-powered Resume Analyzer designed to help job seekers instantly evaluate their resumes against job descriptions. It uses advanced NLP, text extraction, and GenAI to provide actionable feedback, skill matching, and tailored interview preparation materials.
+An AI-powered career platform that helps job seekers improve their resumes, analyze job descriptions, identify skill gaps, and prepare for interviews using Google's Gemini AI.
 
-## Features ✨
-- **PDF Resume Extraction**: Parses text securely from uploaded PDF files (includes OCR support via PyMuPDF & Tesseract).
-- **Skill Extraction & Semantic Matching**: Automatically extracts skills and matches them semantically using deep learning embeddings (`sentence-transformers`).
-- **AI Career Suggestions**: Integrates with Google's Gemini AI to offer customized feedback and actionable resume improvement suggestions.
-- **Interview Preparation**: Auto-generates relevant interview questions based on the resume's profile.
+🌐 **Live Demo:** https://job-fit-ai-alpha-gules.vercel.app
 
-## Tech Stack 🛠️
+---
 
-**Backend**
-- **Framework**: FastAPI (Python)
-- **AI & NLP**: `sentence-transformers`, `google-generativeai` (Gemini)
-- **Document Processing**: `PyMuPDF`, `pytesseract`, `Pillow`
+## ✨ Features
 
-**Frontend**
-- **Framework**: React.js & Vite
-- **Styling**: Tailwind CSS
-- **Design System**: Modular, custom functional components.
+- 📄 Resume Upload & PDF Parsing
+- 🤖 AI Resume Analysis using Gemini AI
+- 🎯 Job Description Matching
+- 📊 Match Score & Skill Gap Analysis
+- 💡 Personalized Resume Improvement Suggestions
+- 🎤 AI-Generated Interview Questions
+- 📱 Responsive React UI
+- 🔒 Secure Backend APIs with FastAPI
 
-## Getting Started 💻
+---
 
-### Backend Setup
-1. Create and activate a virtual environment:
-   ```bash
-   python -m venv venv
-   .\venv\Scripts\activate
-   ```
-2. Install the backend dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Run the FastAPI server:
-   ```bash
-   uvicorn app.main:app --reload
-   ```
+## 🛠️ Tech Stack
 
-### Frontend Setup
-1. Navigate to the `frontend` directory:
-   ```bash
-   cd frontend
-   ```
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Start the Vite React app:
-   ```bash
-   npm run dev
-   ```
+### Frontend
+- React.js
+- Vite
+- Tailwind CSS
+- JavaScript
+
+### Backend
+- FastAPI
+- Python
+- REST APIs
+
+### AI
+- Google Gemini API
+- Sentence Transformers
+
+### Database
+- MongoDB
+
+### Document Processing
+- PyMuPDF
+- Tesseract OCR
+- Pillow
+
+---
+
+## 📸 Screenshots
+
+> Add screenshots here
+
+- Home Page
+- Resume Upload
+- Resume Analysis
+- Match Score Dashboard
+- Interview Questions
+
+---
+
+## 🏗️ Project Architecture
+
+Resume Upload
+↓
+PDF Parsing
+↓
+Skill Extraction
+↓
+Gemini AI Analysis
+↓
+Match Score Generation
+↓
+Interview Question Generation
+↓
+Frontend Dashboard
+
+---
+
+## 🚀 Installation
+
+### Backend
+
+```bash
+python -m venv venv
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## 🔮 Future Improvements
+
+- Authentication
+- Resume History
+- Multiple Resume Comparison
+- ATS Score
+- LinkedIn Profile Analysis
+- Cover Letter Generator
+
+---
+
+## 👨‍💻 Author
+
+**Guna Sekhar Vetti**
+
+LinkedIn
+
+GitHub
+
+Email
+
+---
+
+## ⭐ If you found this project useful, consider giving it a star.
